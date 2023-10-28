@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: MiniBlog
+    build: .
+    ports:
+      - '5000:5000'
+    environment:
+      - FLASK_APP=app
+      - SECRET_KEY=Kx489P0XezHhihVk1lRUcuovtKo55P3OLawPqVyBSbc3
+      - DATABASE_URL=mysql+pymysql://miniblog:miniblog@db/miniblog
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7
+    container_name: Mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: miniblog
+      MYSQL_USER: miniblog
+      MYSQL_PASSWORD: miniblog
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:
