@@ -13,8 +13,10 @@ services:
       - SECRET_KEY=Kx489P0XezHhihVk1lRUcuovtKo55P3OLawPqVyBSbc3
       - JWT_SECRET_KEY=Kx489P0XezHhihVk1lRUcuovtKo55P3OLawPqVyBSbc3
       - DATABASE_URL=mysql+pymysql://miniblog:miniblog@db/miniblog
+      - REDIS_URL=redis://cache:6379/0
     depends_on:
       - db
+      - cache
 
   db:
     image: mysql:5.7
@@ -28,6 +30,12 @@ services:
       - '3306:3306'
     volumes:
       - mysql-data:/var/lib/mysql
+
+  cache:
+    image: redis:6.2-alpine
+    container_name: Redis
+    ports:
+      - '6379:6379'
 
 volumes:
   mysql-data:
