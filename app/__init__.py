@@ -1,23 +1,28 @@
+import redis
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager
 
 from app.config import Settings
 
 app = Flask(__name__)
 app.config.from_object(Settings)
 
+# Connections
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 migrate = Migrate(app, db)
+jwt = JWTManager(app)
+redis_conn = redis.StrictRedis.from_url(app.config['REDIS_URL'], decode_responses=True)
 
 # Root Endpoint
 @app.route('/')
 def root():
     return jsonify(message=f'Welcome to {app.config["APP_NAME"]}')
 
-# Registro de Blueprints
+# Blueprints
 from app.auth.views import bp as auth_bp
 # from app.users.views import blueprint as users_bp 
 # from app.posts.views import blueprint as posts_bp 
