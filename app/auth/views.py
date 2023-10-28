@@ -1,12 +1,14 @@
+from datetime import datetime, timezone
+
 from flask import request, jsonify, Blueprint, current_app
 from marshmallow import ValidationError
 from sqlalchemy.exc import IntegrityError
-from flask_jwt_extended import (jwt_required, create_access_token, current_user)
+from flask_jwt_extended import jwt_required, create_access_token, current_user, get_jwt
 
-from app import db
+from app import db, redis_conn
 from app.schemas import user_schema
 from app.models import User
-from app.auth.handlers import user_identity_lookup, user_lookup_callback
+from app.auth.handlers import *
 
 bp = Blueprint('auth', __name__)
 
@@ -42,6 +44,18 @@ def login():
         return jsonify({'access_token': access_token})
 
     return jsonify({'message': 'Invalid username or password'}), 401
+
+@bp.route('/logout', methods=['DELETE'])
+@jwt_required()
+def logout():
+    jti = get_jwt()['jti']
+    token_expires = get_jwt()['exp']
+    now = datetime.now(timezone.utc)
+    remaining_time = token_expires - int(now.timestamp())
+
+    redis_conn.set(jti, '', ex=remaining_time)
+
+    return jsonify(msg='Access token revoked')
 
 @bp.route('/verify', methods=['GET'])
 @jwt_required()
