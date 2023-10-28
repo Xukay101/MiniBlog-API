@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager
 
 from app.config import Settings
 
@@ -11,6 +12,7 @@ app.config.from_object(Settings)
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 migrate = Migrate(app, db)
+jwt = JWTManager(app)
 
 # Root Endpoint
 @app.route('/')

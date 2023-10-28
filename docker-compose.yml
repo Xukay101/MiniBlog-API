@@ -4,11 +4,14 @@ services:
   api:
     container_name: MiniBlog
     build: .
+    volumes:
+      - .:/app
     ports:
       - '5000:5000'
     environment:
       - FLASK_APP=app
       - SECRET_KEY=Kx489P0XezHhihVk1lRUcuovtKo55P3OLawPqVyBSbc3
+      - JWT_SECRET_KEY=Kx489P0XezHhihVk1lRUcuovtKo55P3OLawPqVyBSbc3
       - DATABASE_URL=mysql+pymysql://miniblog:miniblog@db/miniblog
     depends_on:
       - db
