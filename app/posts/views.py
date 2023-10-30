@@ -5,7 +5,7 @@ from marshmallow import ValidationError
 
 from app import db
 from app.schemas import post_schema, posts_schema
-from app.models import Post
+from app.models import Post, Category
 
 bp = Blueprint('posts', __name__)
 
@@ -44,6 +44,16 @@ class PostAPI(MethodView):
         post_data = request.json
         if not post_data:
             return jsonify(error='Not input data provided.'), 400
+
+        categories = post_data.get('categories', [])
+
+        # Check if categories is empty
+        if not categories:
+            return jsonify(error='At least one category is required.'), 400
+
+        existing_categories = Category.query.filter(Category.id.in_(categories)).all()
+        if len(existing_categories) != len(categories):
+            return jsonify(error='One or more category IDs do not exist.'), 400
 
         try:
             post = post_schema.load(post_data)
