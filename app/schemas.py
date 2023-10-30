@@ -7,6 +7,9 @@ from app.models import User, Post, Category, Comment
 
 # User Schemas
 class UserSchema(ma.SQLAlchemyAutoSchema):
+    id = fields.String(dump_only=True)
+    created_at = fields.String(dump_only=True)
+    updated_at = fields.String(dump_only=True)
     password = fields.String(load_only=True)  # Este campo se usa solo para cargar datos
 
     class Meta:
@@ -20,7 +23,11 @@ users_schema = UserSchema(many=True)
 
 # Post Schemas
 class PostSchema(ma.SQLAlchemyAutoSchema):
-    user_id = fields.String(dump_only=True)  # Este campo se usa solo para mostrar datos
+    id = fields.String(dump_only=True)
+    comments = fields.String(dump_only=True)
+    created_at = fields.String(dump_only=True)
+    updated_at = fields.String(dump_only=True)
+    user_id = fields.String(dump_only=True)
 
     class Meta:
         model = Post
@@ -32,9 +39,14 @@ posts_schema = PostSchema(many=True)
 
 # Category Schemas
 class CategorySchema(ma.SQLAlchemyAutoSchema):
+    id = fields.String(dump_only=True)
+    posts = fields.String(dump_only=True)
+    created_at = fields.String(dump_only=True)
+    updated_at = fields.String(dump_only=True)
+
     class Meta:
         model = Category
-        fields = ['id', 'name', 'posts', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'description', 'posts', 'created_at', 'updated_at']
         load_instance = True
 
 category_schema = CategorySchema()
@@ -42,6 +54,11 @@ categories_schema = CategorySchema(many=True)
 
 # Comment Schemas
 class CommentSchema(ma.SQLAlchemyAutoSchema):
+    id = fields.String(dump_only=True)
+    created_at = fields.String(dump_only=True)
+    updated_at = fields.String(dump_only=True)
+    user_id = fields.String(dump_only=True)
+
     class Meta:
         model = Comment
         fields = ['id', 'content', 'user_id', 'post_id', 'created_at', 'updated_at']

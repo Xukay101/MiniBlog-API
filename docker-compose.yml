@@ -10,9 +10,10 @@ services:
       - '5000:5000'
     environment:
       - FLASK_APP=app
-      - SECRET_KEY=Kx489P0XezHhihVk1lRUcuovtKo55P3OLawPqVyBSbc3
-      - JWT_SECRET_KEY=Kx489P0XezHhihVk1lRUcuovtKo55P3OLawPqVyBSbc3
-      - DATABASE_URL=mysql+pymysql://miniblog:miniblog@db/miniblog
+      - ADMIN_API_KEY=ef0daece340363c97a2a7b3958fcbbb7 # openssl rand -hex 16
+      - SECRET_KEY=99791f4a4fc7dfef9848780c5594ee05 # openssl rand -hex 16
+      - JWT_SECRET_KEY=1ecc82705a0f96fedcc79bea672aa34b # openssl rand -hex 16
+      - DATABASE_URL=mysql+pymysql://miniblog:miniblog@db/miniblog # SQLALCHEMY URI
       - REDIS_URL=redis://cache:6379/0
     depends_on:
       - db
