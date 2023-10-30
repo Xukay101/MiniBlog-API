@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, url_for
 from flask.views import MethodView
 from marshmallow import ValidationError
 from sqlalchemy.exc import IntegrityError
@@ -14,7 +14,23 @@ class CategoryAPI(MethodView):
     def get(self, category_id):
         if category_id is None:
             # Return list of categories 
-            return jsonify(message='List of categories')
+            page = request.args.get('page', 1, type=int)
+            per_page = request.args.get('per_page', 10, type=int)
+
+            paginated_categories = Category.query.paginate(page=page, per_page=per_page, error_out=False)
+            results = categories_schema.dump(paginated_categories.items)
+
+            meta = {
+                'items': results,
+                'page': paginated_categories.page,
+                'per_page': paginated_categories.per_page,
+                'total': paginated_categories.total,
+                'pages': paginated_categories.pages,
+                'next': url_for('categories.category_api', page=paginated_categories.next_num, per_page=per_page) if paginated_categories.has_next else None,
+                'prev': url_for('categories.category_api', page=paginated_categories.prev_num, per_page=per_page) if paginated_categories.has_prev else None,
+            }
+
+            return jsonify(**meta)
         else:
             # Return a single category
             category = Category.query.get(category_id)
