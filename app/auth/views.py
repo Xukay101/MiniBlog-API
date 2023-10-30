@@ -20,12 +20,12 @@ def register():
         user.set_password(user_data['password'])
         db.session.add(user)
         db.session.commit()
-        return jsonify({'message': 'User registered successfully'})
+        return jsonify(message='User registered successfully')
     except ValidationError as err:
         return jsonify(err.messages), 400
     except IntegrityError:
         db.session.rollback()  # Rollback en caso de error
-        return jsonify({'message': 'Username or email already registered'}), 400
+        return jsonify(message='Username or email already registered'), 400
 
 @bp.route('/login', methods=['POST'])
 def login():
@@ -33,7 +33,7 @@ def login():
     password = request.json.get('password')
 
     if not username or not password:
-        return jsonify({'message': 'Username and password are required'}), 400
+        return jsonify(message='Username and password are required'), 400
 
     # Get user in database
     user = User.query.filter_by(username=username).first()
@@ -43,7 +43,19 @@ def login():
         access_token = create_access_token(identity=user)
         return jsonify({'access_token': access_token})
 
-    return jsonify({'message': 'Invalid username or password'}), 401
+    return jsonify(message='Invalid username or password'), 401
+
+@bp.route('/logout', methods=['DELETE'])
+@jwt_required()
+def logout():
+    jti = get_jwt()['jti']
+    token_expires = get_jwt()['exp']
+    now = datetime.now(timezone.utc)
+    remaining_time = token_expires - int(now.timestamp())
+
+    redis_conn.set(jti, '', ex=remaining_time)
+
+    return jsonify(message='Access token revoked')
 
 @bp.route('/logout', methods=['DELETE'])
 @jwt_required()
