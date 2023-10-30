@@ -1,10 +1,10 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, url_for
 from flask.views import MethodView
 from flask_jwt_extended import current_user, jwt_required 
 from marshmallow import ValidationError
 
 from app import db
-from app.schemas import post_schema
+from app.schemas import post_schema, posts_schema
 from app.models import Post
 
 bp = Blueprint('posts', __name__)
@@ -14,7 +14,23 @@ class PostAPI(MethodView):
     def get(self, post_id):
         if post_id is None:
             # Return list of posts
-            return jsonify(message='List of posts')
+            page = request.args.get('page', 1, type=int)
+            per_page = request.args.get('per_page', 10, type=int)
+
+            paginated_posts = Post.query.paginate(page=page, per_page=per_page, error_out=False)
+            results = posts_schema.dump(paginated_posts.items)
+
+            meta = {
+                'items': results,
+                'page': paginated_posts.page,
+                'per_page': paginated_posts.per_page,
+                'total': paginated_posts.total,
+                'pages': paginated_posts.pages,
+                'next': url_for('posts.post_api', page=paginated_posts.next_num, per_page=per_page) if paginated_posts.has_next else None,
+                'prev': url_for('posts.post_api', page=paginated_posts.prev_num, per_page=per_page) if paginated_posts.has_prev else None,
+            }
+
+            return jsonify(**meta)
         else:
             # Return a single post
             post = Post.query.get(post_id)
