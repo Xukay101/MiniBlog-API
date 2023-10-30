@@ -6,6 +6,7 @@ class Settings:
     APP_NAME = 'MiniBlog'
     SECRET_KEY = os.environ.get('SECRET_KEY')
     DEBUG = True
+    ADMIN_API_KEY = os.environ.get('ADMIN_API_KEY')
 
     # Configuración SQLAlchemy
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
