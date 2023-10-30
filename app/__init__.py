@@ -1,7 +1,7 @@
 from functools import wraps
 
 import redis
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
@@ -38,11 +38,11 @@ def require_admin_key(view_function):
 from app.auth.views import bp as auth_bp
 from app.posts.views import bp as posts_bp 
 from app.categories.views import bp as categories_bp
-# from app.users.views import blueprint as users_bp 
-# from app.comments.views import blueprint as comments_bp
+from app.comments.views import bp as comments_bp
+# from app.users.views import bp as users_bp 
 
-app.register_blueprint(auth_bp, url_prefix='/auth')
-app.register_blueprint(posts_bp, url_prefix='/posts')
-app.register_blueprint(categories_bp, url_prefix='/categories')
-# app.register_blueprint(users_bp, url_prefix='/users')
-# app.register_blueprint(comments_bp, url_prefix='/comments')
+app.register_blueprint(auth_bp, url_prefix=f'{app.config["APP_ROOT"]}/auth')
+app.register_blueprint(posts_bp, url_prefix=f'{app.config["APP_ROOT"]}/posts')
+app.register_blueprint(categories_bp, url_prefix=f'{app.config["APP_ROOT"]}/categories')
+app.register_blueprint(comments_bp, url_prefix=f'{app.config["APP_ROOT"]}/posts')
+# app.register_blueprint(users_bp, url_prefix=f'{app.config["APP_ROOT"]}/users')

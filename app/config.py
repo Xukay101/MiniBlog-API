@@ -4,6 +4,7 @@ from datetime import timedelta
 class Settings:
     # Configuración general
     APP_NAME = 'MiniBlog'
+    APP_ROOT = '/api'
     SECRET_KEY = os.environ.get('SECRET_KEY')
     DEBUG = True
     ADMIN_API_KEY = os.environ.get('ADMIN_API_KEY')
