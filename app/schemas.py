@@ -58,6 +58,7 @@ class CommentSchema(ma.SQLAlchemyAutoSchema):
     created_at = fields.String(dump_only=True)
     updated_at = fields.String(dump_only=True)
     user_id = fields.String(dump_only=True)
+    post_id = fields.String(dump_only=True)
 
     class Meta:
         model = Comment
