@@ -13,24 +13,23 @@ services:
       - ADMIN_API_KEY=ef0daece340363c97a2a7b3958fcbbb7 # openssl rand -hex 16
       - SECRET_KEY=99791f4a4fc7dfef9848780c5594ee05 # openssl rand -hex 16
       - JWT_SECRET_KEY=1ecc82705a0f96fedcc79bea672aa34b # openssl rand -hex 16
-      - DATABASE_URL=mysql+pymysql://miniblog:miniblog@db/miniblog # SQLALCHEMY URI
+      - DATABASE_URL=postgresql://miniblog:miniblog@db/miniblog # SQLALCHEMY URI
       - REDIS_URL=redis://cache:6379/0
     depends_on:
       - db
       - cache
 
   db:
-    image: mysql:5.7
-    container_name: Mysql
+    image: postgres:16-alpine
+    container_name: Postgres
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: miniblog
-      MYSQL_USER: miniblog
-      MYSQL_PASSWORD: miniblog
+      POSTGRES_DB: miniblog
+      POSTGRES_USER: miniblog
+      POSTGRES_PASSWORD: miniblog
     ports:
-      - '3306:3306'
+      - '5432:5432'
     volumes:
-      - mysql-data:/var/lib/mysql
+      - postgres-data:/var/lib/postgresql/data
 
   cache:
     image: redis:6.2-alpine
@@ -39,4 +38,4 @@ services:
       - '6379:6379'
 
 volumes:
-  mysql-data:
+  postgres-data:

@@ -6,6 +6,7 @@ from marshmallow import ValidationError
 from app import db
 from app.schemas import post_schema, posts_schema
 from app.models import Post, Category
+from app.utils import is_valid_uuid
 
 bp = Blueprint('posts', __name__)
 
@@ -33,6 +34,9 @@ class PostAPI(MethodView):
             return jsonify(**meta)
         else:
             # Return a single post
+            if not is_valid_uuid(post_id):
+                return jsonify(error=f'Invalid Post UUID {post_id}'), 400
+
             post = Post.query.get(post_id)
             if not post:
                 return jsonify(error=f'Post {post_id} not found.'), 404
@@ -45,19 +49,25 @@ class PostAPI(MethodView):
         if not post_data:
             return jsonify(error='Not input data provided.'), 400
 
-        categories = post_data.get('categories', [])
+        category_ids = post_data.get('categoryIds', [])
 
         # Check if categories is empty
-        if not categories:
+        if not category_ids:
             return jsonify(error='At least one category is required.'), 400
 
-        existing_categories = Category.query.filter(Category.id.in_(categories)).all()
-        if len(existing_categories) != len(categories):
+        # Check if id's are valid
+        for category_uuid in category_ids:
+            if not is_valid_uuid(category_uuid):
+                return jsonify(error='At least one category id is invalid.'), 400
+
+        existing_categories = Category.query.filter(Category.id.in_(category_ids)).all()
+        if len(existing_categories) != len(category_ids):
             return jsonify(error='One or more category IDs do not exist.'), 400
 
         try:
             post = post_schema.load(post_data)
             post.user_id = current_user.id
+            post.categories = existing_categories
             db.session.add(post)
             db.session.commit()
             return post_schema.dump(post), 201 # 201 Created 
@@ -67,6 +77,9 @@ class PostAPI(MethodView):
     @jwt_required()
     def delete(self, post_id):
         ''' Delete a single post '''
+        if not is_valid_uuid(post_id):
+            return jsonify(error=f'Invalid Post UUID {post_id}'), 400
+
         post = Post.query.get(post_id)
         if not post:
             return jsonify(error=f'Post {post_id} not found.'), 404
@@ -83,6 +96,9 @@ class PostAPI(MethodView):
     @jwt_required()
     def put(self, post_id):
         ''' Update a single post '''
+        if not is_valid_uuid(post_id):
+            return jsonify(error=f'Invalid Post UUID {post_id}'), 400
+
         post_data = request.json
         if not post_data:
             return jsonify(error='No input data provided.'), 400
@@ -105,4 +121,4 @@ class PostAPI(MethodView):
 post_view = PostAPI.as_view('post_api')
 bp.add_url_rule('/', defaults={'post_id': None}, view_func=post_view, methods=['GET',])
 bp.add_url_rule('/', view_func=post_view, methods=['POST',])
-bp.add_url_rule('/<int:post_id>/', view_func=post_view, methods=['GET', 'PUT', 'DELETE'])
+bp.add_url_rule('/<string:post_id>/', view_func=post_view, methods=['GET', 'PUT', 'DELETE'])

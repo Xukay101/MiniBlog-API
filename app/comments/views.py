@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from app import db
 from app.schemas import comment_schema, comments_schema
 from app.models import Post
+from app.utils import is_valid_uuid
 
 bp = Blueprint('comments', __name__)
 
@@ -18,11 +19,20 @@ class CommentAPI(MethodView):
             return jsonify(message=f'List of Comments for Post {post_id}')
         else:
             # Return a single comment
+            if not is_valid_uuid(post_id):
+                return jsonify(error=f'Invalid Post UUID {post_id}'), 400
+
+            if not is_valid_uuid(comment_id):
+                return jsonify(error=f'Invalid Comment UUID {comment_id}'), 400
+
             return jsonify(message=f'Get Comment {comment_id} for Post {post_id}')
 
     @jwt_required()
     def post(self, post_id):
-        # Create a new comment for a specific post
+        ''' Create a new comment for a specific post '''
+        if not is_valid_uuid(post_id):
+            return jsonify(error=f'Invalid Post UUID {post_id}'), 400
+
         comment_data = request.json
         if not comment_data:
             return jsonify(error=f'Not input data provided.'), 404
@@ -57,6 +67,6 @@ class CommentAPI(MethodView):
 
 
 comment_view = CommentAPI.as_view('comment_api')
-bp.add_url_rule('/<int:post_id>/comments/', defaults={'comment_id': None}, view_func=comment_view, methods=['GET',])
-bp.add_url_rule('/<int:post_id>/comments/', view_func=comment_view, methods=['POST',])
-bp.add_url_rule('/<int:post_id>/comments/<int:comment_id>/', view_func=comment_view, methods=['GET', 'PUT', 'DELETE'])
+bp.add_url_rule('/<string:post_id>/comments/', defaults={'comment_id': None}, view_func=comment_view, methods=['GET',])
+bp.add_url_rule('/<string:post_id>/comments/', view_func=comment_view, methods=['POST',])
+bp.add_url_rule('/<string:post_id>/comments/<string:comment_id>/', view_func=comment_view, methods=['GET', 'PUT', 'DELETE'])

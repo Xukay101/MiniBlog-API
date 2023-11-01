@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from app import db, require_admin_key
 from app.schemas import category_schema, categories_schema
 from app.models import Category
+from app.utils import is_valid_uuid
 
 bp = Blueprint('categories', __name__)
 
@@ -33,9 +34,13 @@ class CategoryAPI(MethodView):
             return jsonify(**meta)
         else:
             # Return a single category
+            if not is_valid_uuid(category_id):
+                return jsonify(error=f'Invalid UUID {category_id}'), 400
+
             category = Category.query.get(category_id)
             if not category:
                 return jsonify(error=f'Category {category_id} not found.'), 404
+
             return category_schema.dump(category), 200
 
     @require_admin_key
@@ -59,6 +64,9 @@ class CategoryAPI(MethodView):
     @require_admin_key
     def delete(self, category_id):
         ''' Delete a single category'''
+        if not is_valid_uuid(category_id):
+            return jsonify(error=f'Invalid UUID {category_id}'), 400
+
         category = Category.query.get(category_id)
         if not category:
             return jsonify(error=f'Category {category_id} not found.'), 404
@@ -71,6 +79,9 @@ class CategoryAPI(MethodView):
     @require_admin_key
     def put(self, category_id):
         ''' Update a single category'''
+        if not is_valid_uuid(category_id):
+            return jsonify(error=f'Invalid UUID {category_id}'), 400
+
         category_data = request.json
         if not category_data:
             return jsonify(error='Not input data provided.'), 400
@@ -89,4 +100,4 @@ class CategoryAPI(MethodView):
 category_view = CategoryAPI.as_view('category_api')
 bp.add_url_rule('/', defaults={'category_id': None}, view_func=category_view, methods=['GET',])
 bp.add_url_rule('/', view_func=category_view, methods=['POST',])
-bp.add_url_rule('/<int:category_id>/', view_func=category_view, methods=['GET', 'PUT', 'DELETE'])
+bp.add_url_rule('/<string:category_id>/', view_func=category_view, methods=['GET', 'PUT', 'DELETE'])
