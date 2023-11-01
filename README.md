@@ -87,13 +87,6 @@ make up
 make upgrade
 ```
 
-## Testing
-Para ejecutar las pruebas dentro del contenedor Docker, ejecute:
-```bash
-make test
-```
-Después de configurar con make build y make up, puede ejecutar las pruebas. Es importante asegurarse de que la aplicación se construye y se inicia primero para que las pruebas funcionen correctamente.
-
 ## Tecnologías Utilizadas
 *  Flask
 *  PostgreSQL
