@@ -72,6 +72,7 @@ La documentación detallada del proyecto está disponible en [documentacion](htt
 1. Clona este repositorio:
 ```bash
 git clone https://github.com/Xukay101/MiniBlog-API.git
+cd MiniBlog-API
 ```
 2. Construye los servicios:
 ```bash
