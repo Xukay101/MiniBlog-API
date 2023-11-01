@@ -57,6 +57,18 @@ def logout():
 
     return jsonify(message='Access token revoked')
 
+@bp.route('/logout', methods=['DELETE'])
+@jwt_required()
+def logout():
+    jti = get_jwt()['jti']
+    token_expires = get_jwt()['exp']
+    now = datetime.now(timezone.utc)
+    remaining_time = token_expires - int(now.timestamp())
+
+    redis_conn.set(jti, '', ex=remaining_time)
+
+    return jsonify(msg='Access token revoked')
+
 @bp.route('/verify', methods=['GET'])
 @jwt_required()
 def verify():
